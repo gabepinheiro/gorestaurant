@@ -13,7 +13,7 @@ import { Container } from './styles';
 
 type InputPropsType = {
   name: string,
-  icon: ReactNode
+  icon?: ReactNode
 } & InputHTMLAttributes<HTMLInputElement>
 
 const Input = ({ name, icon, ...rest }: InputPropsType) => {
