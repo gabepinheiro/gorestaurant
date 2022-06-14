@@ -5,8 +5,20 @@ import { Container } from './styles';
 
 import api from '../../services/api';
 
-export const Food = ({ food, handleDelete, handleEditFood }) => {
-  const [isAvailable, setIsAvailable] = useState(food.available)
+import { FoodType } from 'types'
+
+type FoodPropsType = {
+  food: FoodType,
+  handleDelete: (id: number) => void
+  handleEditFood: (food: FoodType) => void
+}
+
+export const Food = ({ 
+  food, 
+  handleDelete, 
+  handleEditFood 
+}: FoodPropsType) => {
+  const [isAvailable, setIsAvailable] = useState<boolean>(food.available)
 
   const toggleAvailable = async () => {
     await api.put(`/foods/${food.id}`, {
