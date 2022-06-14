@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
 
 import { Header } from '../../components/Header';
-import api from '../../services/api';
 import { Food } from '../../components/Food';
 import { ModalAddFood } from '../../components/ModalAddFood';
 import { ModalEditFood } from '../../components/ModalEditFood';
+
+import api from '../../services/api';
+
 import { FoodsContainer } from './styles';
 
+import { FoodType } from 'types';
+
 export const Dashboard = () => {
-  const [foods, setFoods] = useState([])
-  const [editingFood, setEditingFood] = useState({})
+  const [foods, setFoods] = useState<FoodType[]>([])
+  const [editingFood, setEditingFood] = useState<FoodType | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [editModalOpen, setEditModaOpen] = useState(false)
 
@@ -22,22 +26,24 @@ export const Dashboard = () => {
     getFoods()
   }, [])
 
-  const handleAddFood = async food => {
+  const handleAddFood = async (food: FoodType) => {
     try {
-      const response = await api.post('/foods', {
+      const { data } = await api.post<FoodType>('/foods', {
         ...food,
         available: true,
       });
 
-      setFoods([...foods, response.data]);
+      setFoods([...foods, data]);
     } catch (err) {
       console.log(err);
     }
   }
 
-  const handleUpdateFood = async food => {
+  const handleUpdateFood = async (food: FoodType) => {
+    if(!editingFood) return 
+
     try {
-      const foodUpdated = await api.put(
+      const foodUpdated = await api.put<FoodType>(
         `/foods/${editingFood.id}`,
         { ...editingFood, ...food },
       );
@@ -50,7 +56,7 @@ export const Dashboard = () => {
     }
   }
 
-  const handleDeleteFood = async id => {
+  const handleDeleteFood = async (id: number)=> {
     await api.delete(`/foods/${id}`);
 
     setFoods(foods => foods.filter(food => food.id !== id));
@@ -64,7 +70,7 @@ export const Dashboard = () => {
     setEditModaOpen(prevState => !prevState);
   }
 
-  const handleEditFood = food => {
+  const handleEditFood = (food: FoodType) => {
     setEditingFood(food)
     setEditModaOpen(true);
   }
@@ -77,12 +83,15 @@ export const Dashboard = () => {
         setIsOpen={toggleModal}
         handleAddFood={handleAddFood}
       />
-      <ModalEditFood
-        isOpen={editModalOpen}
-        setIsOpen={toggleEditModal}
-        editingFood={editingFood}
-        handleUpdateFood={handleUpdateFood}
-      />
+
+      {editingFood && (
+        <ModalEditFood
+          isOpen={editModalOpen}
+          setIsOpen={toggleEditModal}
+          editingFood={editingFood}
+          handleUpdateFood={handleUpdateFood}
+        />
+      )}
 
       <FoodsContainer data-testid="foods-list">
         {foods &&
